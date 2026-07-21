@@ -34,6 +34,7 @@ interface ExtractionState {
   captchaDetected: boolean;
   errorMessage: string | null;
   config: ExtractionConfig | null;
+  sessionId: string | null;
 
   startExtraction: (config: ExtractionConfig) => void;
   abortExtraction: () => void;
@@ -157,6 +158,7 @@ export const useExtractionStore = create<ExtractionState>((set, get) => ({
   captchaDetected: false,
   errorMessage: null,
   config: null,
+  sessionId: null,
 
   setStage: (stage, progress, metrics) => {
     set((s) => ({
@@ -212,6 +214,7 @@ export const useExtractionStore = create<ExtractionState>((set, get) => ({
       if (res.ok) {
         const data = await res.json();
         if (data.sessionId) {
+          set({ sessionId: data.sessionId });
           return;
         }
       }
@@ -320,7 +323,7 @@ export const useExtractionStore = create<ExtractionState>((set, get) => ({
   },
 
   dismissComplete: () => {
-    set({ status: "idle", stage: "idle", progress: 0 });
+    set({ status: "idle", stage: "idle", progress: 0, sessionId: null });
   },
 
   resetExtraction: () => {
@@ -336,6 +339,7 @@ export const useExtractionStore = create<ExtractionState>((set, get) => ({
       captchaDetected: false,
       errorMessage: null,
       config: null,
+      sessionId: null,
     });
   },
 

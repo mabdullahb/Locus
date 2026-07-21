@@ -6,10 +6,14 @@ import { LiveMetricsRow } from "@/components/dashboard/live-metrics-row";
 import { ProgressPipeline } from "@/components/dashboard/progress-pipeline";
 import { DataTable } from "@/components/table/data-table";
 import { useExtractionStore } from "@/stores/extraction-store";
+import { useScrapeWebSocket } from "@/hooks/useScrapeWebSocket";
 
 export default function DashboardPage() {
   const status = useExtractionStore((s) => s.status);
+  const sessionId = useExtractionStore((s) => s.sessionId);
   const showProgress = status !== "idle";
+
+  useScrapeWebSocket(sessionId);
 
   return (
     <div className="flex flex-col gap-6">

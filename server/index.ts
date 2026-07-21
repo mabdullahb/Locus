@@ -5,6 +5,8 @@ import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { Queue, Worker } from "bullmq";
 import IORedis from "ioredis";
+import { prisma } from "@/lib/db";
+import { hybridEnrichLead, decryptApiKey } from "@/lib/enrichment";
 
 const PORT = process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT) : 4000;
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
@@ -129,29 +131,162 @@ async function fetchSerpApiResults(query: string, location: string, maxResults: 
 new Worker<ScrapeJobData>(
   "scrape-jobs",
   async (job) => {
-    const { sessionId, query, location, maxResults } = job.data;
-    broadcast(sessionId, "stage", { stage: "initializing", progress: 2 });
+    const { sessionId, userId, query, location, maxResults, radius, concurrency, proxyType } = job.data;
 
-    broadcast(sessionId, "stage", { stage: "navigating", progress: 10 });
-    await new Promise((r) => setTimeout(r, 500));
+    try {
+      await prisma.scrapeSession.create({
+        data: {
+          id: sessionId,
+          userId,
+          query,
+          location,
+          radius: radius || "25",
+          concurrency: concurrency || 8,
+          proxyType: proxyType || "residential",
+          status: "running",
+          config: { maxResults, enrichmentDepth: job.data.enrichmentDepth },
+        },
+      });
 
-    broadcast(sessionId, "stage", { stage: "parsing", progress: 30 });
-    const results = await fetchSerpApiResults(query, location, maxResults || 100);
+      broadcast(sessionId, "stage", { stage: "initializing", progress: 2 });
 
-    broadcast(sessionId, "stage", {
-      stage: results.length > 0 ? "enriching" : "formatting",
-      progress: results.length > 0 ? 60 : 80,
-      metrics: { locationsFound: results.length },
-    });
+      broadcast(sessionId, "stage", { stage: "navigating", progress: 10 });
+      await new Promise((r) => setTimeout(r, 500));
 
-    broadcast(sessionId, "stage", { stage: "formatting", progress: 90 });
+      broadcast(sessionId, "stage", { stage: "parsing", progress: 30 });
+      const results = await fetchSerpApiResults(query, location, maxResults || 100);
 
-    await new Promise((r) => setTimeout(r, 300));
-    broadcast(sessionId, "complete", {
-      sessionId,
-      totalYield: results.length,
-    });
-    return { sessionId, totalYield: results.length, leads: results };
+      broadcast(sessionId, "stage", {
+        stage: results.length > 0 ? "enriching" : "formatting",
+        progress: results.length > 0 ? 60 : 80,
+        metrics: { locationsFound: results.length },
+      });
+
+      broadcast(sessionId, "stage", { stage: "formatting", progress: 90 });
+
+      if (results.length > 0) {
+        await prisma.businessLead.createMany({
+          data: results.map((r) => ({
+            sessionId,
+            businessName: r.title,
+            location: r.address,
+            phone: r.phone,
+            website: r.website,
+            status: "pending",
+          })),
+        });
+
+        const userApiKey = await prisma.userApiKey.findFirst({
+          where: { userId, isActive: true },
+        });
+
+        if (userApiKey) {
+          const leadsInDb = await prisma.businessLead.findMany({
+            where: { sessionId },
+          });
+
+          const decryptedKey = decryptApiKey(userApiKey.encryptedKey);
+          let enriched = 0;
+
+          const ENRICHMENT_TIMEOUT = 30000;
+
+          for (const lead of leadsInDb) {
+            try {
+              const result = await Promise.race([
+                hybridEnrichLead(
+                  userId,
+                  userApiKey.provider as "gemini" | "anthropic" | "openai",
+                  decryptedKey,
+                  lead.businessName,
+                  lead.website,
+                  lead.location,
+                ),
+                new Promise<never>((_, reject) =>
+                  setTimeout(() => reject(new Error("Enrichment timeout")), ENRICHMENT_TIMEOUT),
+                ),
+              ]);
+
+              await prisma.enrichmentLog.create({
+                data: {
+                  leadId: lead.id,
+                  source: result.source,
+                  resultStatus: result.email ? "found" : "not_found",
+                  emailFound: !!result.email,
+                  apiCostCredits: result.email ? 1 : 0,
+                },
+              });
+
+              if (result.email) {
+                enriched++;
+                await prisma.businessLead.update({
+                  where: { id: lead.id },
+                  data: {
+                    email: result.email,
+                    phone: result.phone || lead.phone,
+                    status: "verified",
+                    emailVerified: true,
+                  },
+                });
+              }
+
+              const pct = Math.round(60 + (enriched / leadsInDb.length) * 25);
+              broadcast(sessionId, "stage", {
+                stage: "enriching",
+                progress: pct,
+                metrics: {
+                  locationsFound: results.length,
+                  phonesExtracted: results.filter((r) => r.phone).length,
+                  emailsVerified: enriched,
+                  fullyEnriched: enriched,
+                },
+              });
+            } catch {
+              await prisma.enrichmentLog.create({
+                data: {
+                  leadId: lead.id,
+                  source: "error",
+                  resultStatus: "error",
+                  emailFound: false,
+                  apiCostCredits: 0,
+                },
+              }).catch(() => {});
+            }
+          }
+        }
+      }
+
+      const duration = Math.floor((Date.now() - job.timestamp) / 1000);
+      await prisma.scrapeSession.update({
+        where: { id: sessionId },
+        data: {
+          status: "completed",
+          totalYield: results.length,
+          completedAt: new Date(),
+          duration,
+        },
+      });
+
+      await new Promise((r) => setTimeout(r, 300));
+      broadcast(sessionId, "complete", {
+        sessionId,
+        totalYield: results.length,
+        leads: results,
+      });
+      return { sessionId, totalYield: results.length, leads: results };
+    } catch (err) {
+      const message = (err as Error).message || "Unknown error";
+      await prisma.scrapeSession.update({
+        where: { id: sessionId },
+        data: {
+          status: "failed",
+          errorLog: message,
+          completedAt: new Date(),
+        },
+      }).catch(() => {});
+
+      broadcast(sessionId, "error", { message });
+      throw err;
+    }
   },
   { connection },
 );
