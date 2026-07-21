@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const receipt = `plan_${user.id}_${Date.now()}`;
+    const receipt = `plan_${user.id.slice(-10)}_${Date.now().toString(36)}`;
 
     const order = await razorpay.orders.create({
       amount: plan.amount,
