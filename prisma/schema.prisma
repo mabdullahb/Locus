@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SessionStatus {
+  completed
+  failed
+  aborted
+  running
+}
+
+enum LeadStatus {
+  verified
+  needs_enrich
+  pending
+  failed
+}
+
+enum UserPlan {
+  starter
+  professional
+  business
+  enterprise
+}
+
+model User {
+  id               String   @id @default(cuid())
+  name             String?
+  email            String   @unique
+  planType         UserPlan @default(starter)
+  creditsRemaining Int      @default(0)
+  apiKey           String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  scrapeSessions ScrapeSession[]
+  exportHistory  ExportHistory[]
+}
+
+model ScrapeSession {
+  id          String         @id @default(cuid())
+  userId      String
+  query       String
+  location    String
+  radius      String         @default("25")
+  concurrency Int            @default(8)
+  proxyType   String         @default("residential")
+  status      SessionStatus  @default(running)
+  totalYield  Int            @default(0)
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+  duration    Int?
+  errorLog    String?
+  config      Json
+
+  user         User           @relation(fields: [userId], references: [id])
+  businessLeads BusinessLead[]
+  proxySessions ProxySession[]
+  exportHistory ExportHistory[]
+}
+
+model BusinessLead {
+  id            String     @id @default(cuid())
+  sessionId     String
+  businessName  String
+  location      String
+  phone         String?
+  email         String?
+  emailVerified Boolean    @default(false)
+  website       String?
+  category      String?
+  lat           Float?
+  lng           Float?
+  status        LeadStatus @default(pending)
+  createdAt     DateTime   @default(now())
+
+  session        ScrapeSession   @relation(fields: [sessionId], references: [id])
+  enrichmentLogs EnrichmentLog[]
+}
+
+model EnrichmentLog {
+  id           String   @id @default(cuid())
+  leadId       String
+  source       String
+  resultStatus String
+  emailFound   Boolean  @default(false)
+  apiCostCredits Float?  @default(0)
+  enrichedAt   DateTime @default(now())
+
+  lead BusinessLead @relation(fields: [leadId], references: [id])
+}
+
+model ProxySession {
+  id            String   @id @default(cuid())
+  sessionId     String
+  proxyIp       String
+  provider      String
+  successRate   Float?
+  requestsMade  Int      @default(0)
+  blockedCount  Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  session ScrapeSession @relation(fields: [sessionId], references: [id])
+}
+
+model ExportHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  sessionId  String
+  format     String
+  fileSize   Int?
+  downloadedAt DateTime @default(now())
+
+  user    User          @relation(fields: [userId], references: [id])
+  session ScrapeSession @relation(fields: [sessionId], references: [id])
+}
