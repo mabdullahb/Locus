@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { requireUserId, unauthorized } from "@/lib/auth-helpers";
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:4000";
 
 export async function POST(req: NextRequest) {
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch {
+    return unauthorized();
+  }
+
   try {
     const body = await req.json();
     const { query, location, radius, concurrency, proxyType, enrichmentDepth, maxResults } = body;
@@ -20,7 +28,7 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionId,
-          userId: "user-1",
+          userId,
           query,
           location,
           radius: radius || "25",

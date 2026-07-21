@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   Activity,
@@ -12,6 +13,7 @@ import {
   Key,
   Shield,
   Settings,
+  CreditCard,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -38,6 +40,7 @@ const navGroups = [
   {
     label: "System",
     items: [
+      { href: "/billing", label: "Billing", icon: CreditCard },
       { href: "/api-keys", label: "API Keys", icon: Key },
       { href: "/proxy", label: "Proxy Management", icon: Shield },
       { href: "/settings", label: "Settings", icon: Settings },
@@ -45,9 +48,21 @@ const navGroups = [
   },
 ];
 
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
+  const user = session?.user;
 
   return (
     <aside
@@ -108,12 +123,12 @@ export function Sidebar() {
           )}
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-            JD
+            {user ? getInitials(user.name || user.email) : "U"}
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-sidebar-foreground">
-                John Doe
+                {user?.name || user?.email || "User"}
               </p>
               <p className="truncate text-xs text-muted-foreground">
                 Starter Plan

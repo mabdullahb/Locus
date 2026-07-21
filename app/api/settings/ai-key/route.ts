@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { encryptApiKey, getAvailableProviders } from "@/lib/enrichment";
+import { requireUserId, unauthorized } from "@/lib/auth-helpers";
 
 const VALID_PROVIDERS = getAvailableProviders();
 
-function maskKey(key: string): string {
-  if (key.length <= 8) return "*".repeat(key.length);
-  return key.slice(0, 4) + "*".repeat(key.length - 8) + key.slice(-4);
-}
-
 export async function GET() {
-  const userId = "user-1";
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch {
+    return unauthorized();
+  }
+
   try {
     const keys = await prisma.userApiKey.findMany({
       where: { userId, isActive: true },
@@ -31,7 +33,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const userId = "user-1";
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch {
+    return unauthorized();
+  }
+
   try {
     const { provider, apiKey } = await req.json() as { provider: string; apiKey: string };
 
@@ -69,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       provider,
-      keyPrefix: maskKey(apiKey),
+      keyPrefix: apiKey.slice(0, 4) + "****",
       message: "API key saved successfully",
     });
   } catch {
@@ -78,7 +86,13 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const userId = "user-1";
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch {
+    return unauthorized();
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const provider = searchParams.get("provider");

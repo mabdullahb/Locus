@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,20 +20,27 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Registration failed");
+      }
+
+      await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } catch {
-      setError("Something went wrong");
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -45,9 +53,9 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded bg-primary">
             <span className="font-display text-xl font-bold text-primary-foreground">L</span>
           </div>
-          <h1 className="font-display text-2xl font-semibold text-foreground">Sign in to Locus</h1>
+          <h1 className="font-display text-2xl font-semibold text-foreground">Create your account</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Enterprise Google Maps Intelligence
+            Start extracting business intelligence
           </p>
         </div>
 
@@ -58,6 +66,20 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+
+          <div>
+            <label htmlFor="name" className="mb-1 block text-sm font-medium text-foreground">
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
 
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
@@ -83,8 +105,9 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder="At least 8 characters"
               required
+              minLength={8}
               className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
@@ -95,14 +118,14 @@ export default function LoginPage() {
             className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Sign in
+            Create account
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Create one
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Sign in
           </Link>
         </p>
       </div>
