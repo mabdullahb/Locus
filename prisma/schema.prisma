@@ -49,6 +49,8 @@ model User {
   userApiKeys    UserApiKey[]
   subscription   Subscription?
   payments       Payment[]
+  webhookConfig  WebhookConfig?
+  connectorConfigs ConnectorConfig[]
 }
 
 model Account {
@@ -208,4 +210,30 @@ model UserApiKey {
   updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model WebhookConfig {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  webhookUrl String
+  secret     String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ConnectorConfig {
+  id          String   @id @default(cuid())
+  userId      String
+  connectorId String
+  config      Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, connectorId])
 }

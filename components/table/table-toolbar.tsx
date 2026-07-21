@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Download, ChevronDown, FileText, FileSpreadsheet, FileCode, Webhook } from "lucide-react";
+import { Search, Download, ChevronDown, FileText, FileSpreadsheet, FileCode, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLeadsStore, type StatusFilter } from "@/stores/leads-store";
 
@@ -18,8 +18,10 @@ export function TableToolbar({ totalCount }: { totalCount: number }) {
   const statusFilter = useLeadsStore((s) => s.statusFilter);
   const setSearch = useLeadsStore((s) => s.setSearch);
   const setStatusFilter = useLeadsStore((s) => s.setStatusFilter);
+  const leads = useLeadsStore((s) => s.leads);
 
   const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState<string | null>(null);
   const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,11 +35,54 @@ export function TableToolbar({ totalCount }: { totalCount: number }) {
   }, []);
 
   const exportOptions = [
-    { label: "CSV", icon: FileText },
-    { label: "Excel (XLSX)", icon: FileSpreadsheet },
-    { label: "JSON", icon: FileCode },
-    { label: "Push to CRM", icon: Webhook },
+    { label: "CSV", format: "csv" as const, icon: FileText },
+    { label: "Excel (XLSX)", format: "xlsx" as const, icon: FileSpreadsheet },
+    { label: "JSON", format: "json" as const, icon: FileCode },
   ];
+
+  const handleExport = async (format: "csv" | "xlsx" | "json") => {
+    setExporting(format);
+    setExportOpen(false);
+    try {
+      const columns = [
+        { key: "businessName", label: "Business Name" },
+        { key: "location", label: "Location" },
+        { key: "phone", label: "Phone" },
+        { key: "email", label: "Email" },
+        { key: "status", label: "Status" },
+        { key: "createdAt", label: "Created At" },
+      ];
+
+      const res = await fetch("/api/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: "live",
+          format,
+          columns,
+          data: leads,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Export failed");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const disposition = res.headers.get("Content-Disposition");
+      const match = disposition?.match(/filename="?(.+?)"?$/);
+      a.download = match?.[1] ?? `locus-export.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export failed:", err);
+    } finally {
+      setExporting(null);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -56,10 +101,15 @@ export function TableToolbar({ totalCount }: { totalCount: number }) {
         <div className="relative" ref={exportRef}>
           <button
             onClick={() => setExportOpen(!exportOpen)}
-            className="flex h-9 items-center gap-1.5 rounded-lg border border-input bg-background px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            disabled={exporting !== null}
+            className="flex h-9 items-center gap-1.5 rounded-lg border border-input bg-background px-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Download className="h-4 w-4" />
-            Export
+            {exporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {exporting ? `Exporting ${exporting.toUpperCase()}...` : "Export"}
             <ChevronDown className="h-3.5 w-3.5" />
           </button>
           {exportOpen && (
@@ -69,7 +119,7 @@ export function TableToolbar({ totalCount }: { totalCount: number }) {
                 return (
                   <button
                     key={opt.label}
-                    onClick={() => setExportOpen(false)}
+                    onClick={() => handleExport(opt.format)}
                     className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-muted"
                   >
                     <Icon className="h-4 w-4 text-muted-foreground" />

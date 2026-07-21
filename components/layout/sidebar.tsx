@@ -33,7 +33,7 @@ const navGroups = [
     label: "Intelligence",
     items: [
       { href: "/enrichment", label: "AI Enrichment", icon: Brain },
-      { href: "/integrations", label: "Integrations", icon: Puzzle },
+      { href: "/settings", label: "Integrations", icon: Puzzle },
       { href: "/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
