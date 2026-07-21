@@ -11,7 +11,7 @@
     "web": {
       "root": ".",
       "framework": "nextjs",
-      "buildCommand": "npm install && npx prisma generate && npm run build"
+      "buildCommand": "npx prisma generate && npm run build"
     }
   },
   "rewrites": [
