@@ -128,7 +128,7 @@ export function CommandCenter() {
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <select
               value={form.radius}
               onChange={(e) => updateForm("radius", e.target.value)}
@@ -157,7 +157,7 @@ export function CommandCenter() {
             <button
               onClick={handleStart}
               disabled={isDisabled || !form.keyword.trim() || !form.location.trim()}
-              className="flex h-10 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none sm:px-5"
             >
               {buttonContent()}
             </button>

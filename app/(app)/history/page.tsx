@@ -208,7 +208,7 @@ export default function HistoryPage() {
                 <th className="px-4 py-3">
                   <SortHeader field="query" label="Query" />
                 </th>
-                <th className="px-4 py-3">
+                <th className="hidden px-4 py-3 md:table-cell">
                   <SortHeader field="location" label="Location" />
                 </th>
                 <th className="px-4 py-3">
@@ -220,9 +220,9 @@ export default function HistoryPage() {
                 <th className="px-4 py-3 text-right">
                   <SortHeader field="yield.leads" label="Leads" />
                 </th>
-                <th className="px-4 py-3 text-right">Emails</th>
-                <th className="px-4 py-3 text-right">Enriched</th>
-                <th className="px-4 py-3 text-right">Duration</th>
+                <th className="hidden px-4 py-3 text-right lg:table-cell">Emails</th>
+                <th className="hidden px-4 py-3 text-right lg:table-cell">Enriched</th>
+                <th className="hidden px-4 py-3 text-right sm:table-cell">Duration</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -242,7 +242,7 @@ export default function HistoryPage() {
                           {session.query}
                         </p>
                       </td>
-                      <td className="max-w-[140px] px-4 py-3">
+                      <td className="hidden max-w-[140px] px-4 py-3 md:table-cell">
                         <p className="truncate text-muted-foreground">
                           {session.location}
                         </p>
@@ -256,13 +256,13 @@ export default function HistoryPage() {
                       <td className="px-4 py-3 text-right font-medium text-foreground">
                         {session.yield.leads}
                       </td>
-                      <td className="px-4 py-3 text-right text-muted-foreground">
+                      <td className="hidden px-4 py-3 text-right text-muted-foreground lg:table-cell">
                         {session.yield.emails}
                       </td>
-                      <td className="px-4 py-3 text-right text-muted-foreground">
+                      <td className="hidden px-4 py-3 text-right text-muted-foreground lg:table-cell">
                         {session.yield.enriched}
                       </td>
-                      <td className="px-4 py-3 text-right text-xs text-muted-foreground">
+                      <td className="hidden px-4 py-3 text-right text-xs text-muted-foreground sm:table-cell">
                         {formatDuration(session.duration)}
                       </td>
                       <td className="px-4 py-3">

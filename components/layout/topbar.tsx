@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Command, History, LogOut } from "lucide-react";
+import { Search, Command, History, LogOut, Menu } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useHistoryStore } from "@/stores/history-store";
+import { useUIStore } from "@/stores/ui-store";
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return "U";
@@ -19,15 +20,23 @@ export function Topbar() {
   const { data: session } = useSession();
   const togglePanel = useHistoryStore((s) => s.togglePanel);
   const sessionCount = useHistoryStore((s) => s.sessions.length);
+  const toggleMobileSidebar = useUIStore((s) => s.toggleMobileSidebar);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-border bg-background px-6">
+    <header className="flex h-14 items-center gap-4 border-b border-border bg-background px-4 lg:px-6">
+      <button
+        onClick={toggleMobileSidebar}
+        className="flex items-center justify-center rounded-lg p-1.5 text-muted-foreground hover:bg-muted lg:hidden"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
       <div className="relative flex flex-1 items-center">
         <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Search queries, leads, configurations... (Cmd+K)"
+          placeholder="Search queries, leads, configurations..."
           className="h-9 w-full max-w-md rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
         />
         <kbd className="ml-2 hidden items-center gap-1 rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:flex">

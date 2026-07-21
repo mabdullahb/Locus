@@ -30,8 +30,8 @@ interface ColumnDef {
 const columns: ColumnDef[] = [
   { key: "select", label: "", sortable: false, className: "w-10" },
   { key: "businessName", label: "Business Name", sortable: true },
-  { key: "location", label: "Location", sortable: true },
-  { key: "phone", label: "Phone Number", sortable: true },
+  { key: "location", label: "Location", sortable: true, className: "hidden md:table-cell" },
+  { key: "phone", label: "Phone Number", sortable: true, className: "hidden lg:table-cell" },
   { key: "email", label: "Email Address", sortable: true },
   { key: "status", label: "Status", sortable: true, className: "w-28" },
   { key: "actions", label: "Actions", sortable: false, className: "w-20" },
@@ -183,7 +183,7 @@ export function DataTable() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-3">
+                      <td className="hidden px-3 md:table-cell">
                         <div className="flex items-center gap-1.5">
                           <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">
@@ -191,7 +191,7 @@ export function DataTable() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-3">
+                      <td className="hidden px-3 lg:table-cell">
                         <span className="font-mono text-sm text-foreground">
                           {lead.phone}
                         </span>

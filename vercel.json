@@ -1,0 +1,13 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "regions": ["bom1"],
+  "crons": [],
+  "env": {
+    "NEXT_PUBLIC_WS_URL": "wss://api.locus.app/ws",
+    "NEXT_PUBLIC_SERVER_URL": "https://api.locus.app",
+    "NEXT_PUBLIC_RAZORPAY_KEY_ID": "@razorpay-key-id"
+  }
+}

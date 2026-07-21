@@ -16,9 +16,11 @@ import {
   CreditCard,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useUIStore } from "@/stores/ui-store";
 
 const navGroups = [
   {
@@ -62,12 +64,14 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [collapsed, setCollapsed] = useState(false);
+  const mobileSidebarOpen = useUIStore((s) => s.mobileSidebarOpen);
+  const setMobileSidebarOpen = useUIStore((s) => s.setMobileSidebarOpen);
   const user = session?.user;
 
-  return (
+  const sidebarContent = (
     <aside
       className={cn(
-        "flex flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
+        "flex h-full flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300",
         collapsed ? "w-16" : "w-60",
       )}
     >
@@ -97,6 +101,7 @@ export function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setMobileSidebarOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-2 text-sm transition-colors",
                     collapsed && "justify-center px-2",
@@ -140,10 +145,76 @@ export function Sidebar() {
 
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="flex h-8 items-center justify-center border-t border-sidebar-border text-muted-foreground hover:text-sidebar-foreground"
+        className="hidden h-8 items-center justify-center border-t border-sidebar-border text-muted-foreground hover:text-sidebar-foreground lg:flex"
       >
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       </button>
     </aside>
+  );
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileSidebarOpen(false)}
+        >
+          <div
+            className="h-full w-60 animate-slide-up bg-sidebar shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex h-14 items-center justify-between border-b border-sidebar-border px-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded bg-primary">
+                  <span className="font-display text-sm font-bold text-primary-foreground">L</span>
+                </div>
+                <span className="font-display text-lg font-semibold text-sidebar-foreground">
+                  Locus
+                </span>
+              </div>
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="rounded p-1 text-muted-foreground hover:bg-sidebar-accent"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="overflow-y-auto py-4">
+              {navGroups.map((group) => (
+                <div key={group.label} className="mb-4">
+                  <p className="mb-1 px-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    {group.label}
+                  </p>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileSidebarOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-2 text-sm transition-colors",
+                          active
+                            ? "border-r-2 border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                            : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex">{sidebarContent}</div>
+    </>
   );
 }
