@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Locus design system: "Instrument".
+     Dark-first, high-contrast, dense. One rationed accent (emerald green) for
+     the primary action, active nav mark, verified state, plot crosshair,
+     selected-row bar and focus ring. No decorative colour, no gradients, no
+     serif. See DESIGN.md. */
+  :root {
+    color-scheme: dark;
+
+    --background: 225 13% 6%;
+    --foreground: 48 10% 90%;
+    --foreground-strong: 48 17% 94%;
+    --card: 225 8% 10%;
+    --card-foreground: 48 10% 90%;
+    --popover: 228 8% 12%;
+    --popover-foreground: 48 10% 90%;
+    --primary: 157 74% 40%;
+    --primary-foreground: 155 32% 6%;
+    --secondary: 228 8% 12%;
+    --secondary-foreground: 48 10% 90%;
+    --muted: 228 8% 12%;
+    --muted-foreground: 231 4% 58%;
+    --accent: 157 74% 40%;
+    --accent-foreground: 155 32% 6%;
+    --positive: 157 74% 40%;
+    --positive-foreground: 155 32% 6%;
+    --destructive: 8 65% 57%;
+    --destructive-foreground: 48 17% 94%;
+    /* --destructive itself only meets WCAG contrast as a foreground/accent
+       color against this app's dark backgrounds (confirmed: ~4.7-5.2:1),
+       not as a solid button fill: even pure white text on it lands at
+       3.74:1, below the 4.5:1 minimum. This darker variant, same hue and
+       saturation, is for solid destructive buttons specifically, confirmed
+       at 4.84:1 against --destructive-foreground. */
+    --destructive-solid: 8 65% 45%;
+    --border: 228 6% 16%;
+    --input: 229 6% 21%;
+    --ring: 157 74% 40%;
+    --chart-1: 157 74% 40%;
+    --chart-2: 48 8% 62%;
+    --chart-3: 157 40% 62%;
+    --chart-4: 231 4% 42%;
+    --chart-5: 8 50% 55%;
+    --radius: 0.375rem;
+
+    --sidebar-background: 225 13% 6%;
+    --sidebar-foreground: 48 10% 90%;
+    --sidebar-primary: 157 74% 40%;
+    --sidebar-primary-foreground: 155 32% 6%;
+    --sidebar-accent: 228 8% 13%;
+    --sidebar-accent-foreground: 157 74% 40%;
+    --sidebar-border: 228 6% 16%;
+    --sidebar-ring: 157 74% 40%;
+  }
+
+  /* Light counterpart. Not wired to a toggle yet, kept faithful for later. */
+  .light {
+    color-scheme: light;
+
+    --background: 60 12% 98%;
+    --foreground: 225 8% 11%;
+    --foreground-strong: 225 12% 6%;
+    --card: 0 0% 100%;
+    --card-foreground: 225 8% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 8% 11%;
+    --primary: 158 80% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 8% 96%;
+    --secondary-foreground: 225 8% 11%;
+    --muted: 60 8% 96%;
+    --muted-foreground: 231 4% 43%;
+    --accent: 158 80% 28%;
+    --accent-foreground: 0 0% 100%;
+    --positive: 158 80% 28%;
+    --positive-foreground: 0 0% 100%;
+    --destructive: 8 63% 43%;
+    --destructive-foreground: 0 0% 100%;
+    /* Already passes as a solid fill here (5.88:1 against white), unlike
+       the dark-mode value, so this is just the same color again, not a
+       separate darker one, kept only so the token always exists. */
+    --destructive-solid: 8 63% 43%;
+    --border: 60 6% 89%;
+    --input: 60 6% 83%;
+    --ring: 158 80% 28%;
+    --chart-1: 158 80% 28%;
+    --chart-2: 48 6% 46%;
+    --chart-3: 158 45% 42%;
+    --chart-4: 231 6% 60%;
+    --chart-5: 8 55% 48%;
+
+    --sidebar-background: 60 12% 98%;
+    --sidebar-foreground: 225 8% 11%;
+    --sidebar-primary: 158 80% 28%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 60 8% 95%;
+    --sidebar-accent-foreground: 158 80% 28%;
+    --sidebar-border: 60 6% 89%;
+    --sidebar-ring: 158 80% 28%;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* The plot-in marker: a new located row carries a 2px amber left edge that
+   decays over about 1s. Functional, not decoration. */
+@keyframes plot-in-marker {
+  0% {
+    box-shadow: inset 2px 0 0 0 hsl(var(--accent) / 0.9);
+  }
+  100% {
+    box-shadow: inset 2px 0 0 0 hsl(var(--accent) / 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

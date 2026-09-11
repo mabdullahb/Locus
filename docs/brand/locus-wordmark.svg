@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 12 872 276" fill="none">
+  <!-- Locus wordmark, rendered as a static asset from components/brand/logo.tsx's
+       LocusWordmark, same geometry, colors sampled live from the running app's
+       sidebar (dark-only design, see DESIGN.md), not invented. -->
+  <rect x="-16" y="12" width="872" height="276" rx="32" fill="#0D0E11"/>
+  <defs>
+    <clipPath id="wordmark-clip"><circle cx="258" cy="150" r="73"/></clipPath>
+  </defs>
+  <text x="34" y="216" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="204" font-weight="800" letter-spacing="-4" fill="#E8E7E3">L</text>
+  <text x="352" y="216" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="204" font-weight="800" letter-spacing="-4" fill="#E8E7E3">cus</text>
+  <g transform="translate(5.16 5) scale(0.98)">
+    <circle cx="258" cy="150" r="80" stroke="#E8E7E3" stroke-width="13" fill="none"/>
+    <g clip-path="url(#wordmark-clip)">
+      <g stroke="#1BB178" stroke-width="2.4" fill="none" opacity="0.55" stroke-linecap="round">
+        <ellipse cx="258" cy="150" rx="27" ry="74"/>
+        <ellipse cx="258" cy="150" rx="54" ry="74"/>
+        <path d="M184 110q74-9 148 0"/>
+        <path d="M180 130q78-6 156 0"/>
+        <path d="M180 150h156"/>
+        <path d="M180 170q78 6 156 0"/>
+        <path d="M184 190q74 9 148 0"/>
+      </g>
+      <g fill="#1BB178">
+        <polygon points="203 96 219 87 235 89 248 96 245 110 253 118 244 125 240 137 231 134 227 145 220 152 215 143 219 129 208 124 203 111"/>
+        <polygon points="243 79 253 76 260 82 257 90 248 90 243 85"/>
+        <polygon points="227 150 241 151 246 164 242 179 240 194 231 210 224 217 222 203 226 187 221 174 224 160"/>
+        <polygon points="256 99 271 93 285 98 282 107 271 111 261 108 254 103"/>
+        <polygon points="267 117 285 112 301 119 307 132 302 144 306 155 299 167 291 184 283 193 277 183 276 166 269 152 265 135"/>
+        <polygon points="305 90 324 87 334 98 329 109 316 111 305 104 301 96"/>
+      </g>
+    </g>
+  </g>
+</svg>

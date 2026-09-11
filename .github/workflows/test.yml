@@ -1,0 +1,72 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: locus
+          POSTGRES_PASSWORD: locus_dev
+          POSTGRES_DB: locus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://locus:locus_dev@localhost:5432/locus
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ci-only-secret-do-not-use-in-production
+      ENRICHMENT_KEY_SECRET: ci-only-secret-do-not-use-in-production
+      # This id/email pair doesn't need to pre-exist. NextAuth's JWT session
+      # strategy never hits the DB to validate the session, and
+      # tests/e2e/global-setup.ts seeds a real User row plus a small
+      # realistic session and a few leads for it (skipped automatically if
+      # the row already exists, so this is a no-op against a real account).
+      # Empty-state pages passing was previously the only thing this ever
+      # tested, real WCAG violations on populated pages went undetected as a
+      # direct result. See global-setup.ts for the full explanation.
+      E2E_USER_EMAIL: e2e-ci@locus.local
+      E2E_USER_ID: e2e-ci-placeholder-user-id
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma generate
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Start app and wait for it to be ready
+        run: |
+          npm start &
+          npx --yes wait-on http://localhost:3000 --timeout 60000
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7

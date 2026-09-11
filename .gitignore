@@ -1,0 +1,74 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+/test-results
+/playwright-report
+tests/e2e/.auth-state.json
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+.gstack/
+
+/lib/generated/prisma
+.env*
+
+# Local design skill installs (not project code)
+.claude/skills/banner-design/
+.claude/skills/brand/
+.claude/skills/design/
+.claude/skills/design-system/
+.claude/skills/slides/
+.claude/skills/ui-styling/
+.claude/skills/ui-ux-pro-max/
+
+# Local generic Prisma skill installs (symlinks into .agents/, not project code)
+.claude/skills/prisma-cli
+.claude/skills/prisma-client-api
+.claude/skills/prisma-compute
+.claude/skills/prisma-database-setup
+.claude/skills/prisma-driver-adapter-implementation
+.claude/skills/prisma-mongodb-upgrade
+.claude/skills/prisma-postgres
+.claude/skills/prisma-postgres-setup
+.claude/skills/prisma-upgrade-v7
+
+# Local AI-assistant tooling
+.agents/
+.windsurf/
+scratch/
+
+# Personal session reports/transcripts, never meant for the repo
+LOCUS_ENGINEERING_REPORT.md
+LOCUS_ENGINEERING_REPORT.pdf
+LOCUS_SESSION_TRANSCRIPT.md

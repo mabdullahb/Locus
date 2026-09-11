@@ -1,0 +1,14 @@
+title = "Locus gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic password literals used in reset-password tests (not credential-shaped, but flagged by a generic rule)"
+paths = [
+  '''tests/integration/reset-password\.test\.ts''',
+]
+regexes = [
+  '''a-good-password''',
+  '''brand-new-pass''',
+]

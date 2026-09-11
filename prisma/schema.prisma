@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SessionStatus {
+  completed
+  failed
+  aborted
+  running
+}
+
+enum LeadStatus {
+  verified
+  needs_enrich
+  pending
+  failed
+}
+
+model User {
+  id               String     @id @default(cuid())
+  name             String?
+  email            String     @unique
+  emailVerified    DateTime?
+  image            String?
+  password         String?
+  isAdmin          Boolean    @default(false)
+  savedSearchConfig Json?
+  apiKey           String?    @unique
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  notifyExtractionComplete Boolean @default(true)
+  notifyEnrichmentComplete Boolean @default(true)
+  notifyWeeklySummary      Boolean @default(false)
+
+  accounts       Account[]
+  sessions       Session[]
+  deviceSessions UserSession[]
+  passwordResetTokens PasswordResetToken[]
+  scrapeSessions ScrapeSession[]
+  exportHistory  ExportHistory[]
+  userApiKeys    UserApiKey[]
+  webhookConfig  WebhookConfig?
+  connectorConfigs ConnectorConfig[]
+}
+
+model UserSession {
+  id         String   @id @default(cuid())
+  userId     String
+  device     String?
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  revoked    Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model ScrapeSession {
+  id          String         @id @default(cuid())
+  userId      String
+  query       String
+  location    String
+  radius      String         @default("25")
+  concurrency Int            @default(8)
+  proxyType   String         @default("residential")
+  status      SessionStatus  @default(running)
+  totalYield  Int            @default(0)
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+  duration    Int?
+  errorLog    String?
+  config      Json
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessLeads BusinessLead[]
+  proxySessions ProxySession[]
+  exportHistory ExportHistory[]
+
+  @@index([userId])
+}
+
+model BusinessLead {
+  id            String     @id @default(cuid())
+  sessionId     String
+  businessName  String
+  location      String
+  phone         String?
+  email         String?
+  emailVerified Boolean    @default(false)
+  website       String?
+  category      String?
+  lat           Float?
+  lng           Float?
+  status        LeadStatus @default(pending)
+  createdAt     DateTime   @default(now())
+
+  // Identifies the same real-world business across searches. Prefers a
+  // stable provider place id ("place:<id>") when the search provider
+  // returns one; falls back to a normalized name+location key ("norm:...")
+  // when it doesn't, so matching still works, just less precisely than a
+  // real place id would. Scoped by session.userId at query time (see
+  // server/index.ts), not a unique constraint here, since two different
+  // users can legitimately have the same business in their own results.
+  dedupeKey String?
+
+  // How many times a search has re-found this exact business (via
+  // dedupeKey) since it was first saved, and when that most recently
+  // happened. A re-find doesn't create a new row (existing behavior,
+  // unchanged) — it updates these two fields on the original row instead
+  // of the match being silently discarded with no record it happened.
+  timesSeen Int      @default(1)
+  lastSeenAt DateTime @default(now())
+
+  session        ScrapeSession   @relation(fields: [sessionId], references: [id])
+  enrichmentLogs EnrichmentLog[]
+
+  @@index([sessionId])
+  @@index([dedupeKey])
+}
+
+model EnrichmentLog {
+  id           String   @id @default(cuid())
+  leadId       String
+  source       String
+  resultStatus String
+  emailFound   Boolean  @default(false)
+  apiCostCredits Float?  @default(0)
+  errorMessage String?
+  enrichedAt   DateTime @default(now())
+
+  lead BusinessLead @relation(fields: [leadId], references: [id])
+
+  @@index([leadId])
+}
+
+model ProxySession {
+  id            String   @id @default(cuid())
+  sessionId     String
+  proxyIp       String
+  provider      String
+  successRate   Float?
+  requestsMade  Int      @default(0)
+  blockedCount  Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  session ScrapeSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
+
+model ExportHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  sessionId  String
+  format     String
+  fileSize   Int?
+  downloadedAt DateTime @default(now())
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session ScrapeSession @relation(fields: [sessionId], references: [id])
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model UserApiKey {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String
+  encryptedKey String
+  keyPrefix    String
+  model        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+model WebhookConfig {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  webhookUrl String
+  secret     String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ConnectorConfig {
+  id          String   @id @default(cuid())
+  userId      String
+  connectorId String
+  config      Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, connectorId])
+}
