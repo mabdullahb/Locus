@@ -1,0 +1,109 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-locus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-locus_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-locus}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-locus}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # The Next.js app. NEXT_PUBLIC_* values are baked into the browser bundle
+  # at build time (see Dockerfile), so they're passed as build args here,
+  # not just runtime environment: entries, changing them after the image is
+  # built has no effect until it's rebuilt.
+  #
+  # NEXT_PUBLIC_SERVER_URL is only actually read server-side (the app's own
+  # API routes calling the worker to enqueue a job), never in the browser
+  # bundle despite the NEXT_PUBLIC_ prefix, so the compose-internal service
+  # name below is correct and doesn't need to be a real public URL.
+  #
+  # NEXT_PUBLIC_WS_URL is the opposite: the browser connects to it directly
+  # for live progress, so it MUST be a real, publicly reachable address once
+  # this is actually deployed (e.g. wss://yourdomain.com/ws through a
+  # reverse proxy, or ws://yourdomain.com:4000/ws if you expose the worker
+  # port directly). The default below only works for local testing on the
+  # same machine.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:4000/ws}
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:-http://worker:4000}
+        NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-locus}:${POSTGRES_PASSWORD:-locus_dev}@postgres:5432/${POSTGRES_DB:-locus}"
+      NEXTAUTH_URL: "${NEXTAUTH_URL:?set NEXTAUTH_URL in .env to this app's real public URL}"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET in .env, generate with openssl rand -base64 32}"
+      ENRICHMENT_KEY_SECRET: "${ENRICHMENT_KEY_SECRET:?set ENRICHMENT_KEY_SECRET in .env, generate with openssl rand -hex 32}"
+      INTERNAL_API_SECRET: "${INTERNAL_API_SECRET:?set INTERNAL_API_SECRET in .env, generate with openssl rand -hex 32}"
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      EMAIL_FROM: "${EMAIL_FROM:-Locus <onboarding@resend.dev>}"
+      NEXT_PUBLIC_SENTRY_DSN: "${NEXT_PUBLIC_SENTRY_DSN:-}"
+      SENTRY_ORG: "${SENTRY_ORG:-}"
+      SENTRY_PROJECT: "${SENTRY_PROJECT:-locus}"
+      NINE_ROUTER_BASE_URL: "${NINE_ROUTER_BASE_URL:-}"
+      NINE_ROUTER_ALLOW_INSECURE_HTTP: "${NINE_ROUTER_ALLOW_INSECURE_HTTP:-}"
+      # True by default here because a self-hosted deployment normally sits
+      # behind a reverse proxy (nginx, Caddy, Traefik) that overwrites
+      # X-Forwarded-For with the real client IP before it reaches this
+      # container. Set to "false" if this app's port is ever exposed
+      # directly to the internet with nothing in front of it.
+      TRUST_PROXY_HEADERS: "${TRUST_PROXY_HEADERS:-true}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # The background worker: runs the actual Google Maps searches and AI
+  # enrichment, and pushes live progress to the app over WebSocket. Separate
+  # container from `app` so it can restart independently of the web process.
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-locus}:${POSTGRES_PASSWORD:-locus_dev}@postgres:5432/${POSTGRES_DB:-locus}"
+      REDIS_URL: "redis://redis:6379"
+      SERVER_PORT: 4000
+      INTERNAL_API_SECRET: "${INTERNAL_API_SECRET:?set INTERNAL_API_SECRET in .env, generate with openssl rand -hex 32}"
+      ENRICHMENT_KEY_SECRET: "${ENRICHMENT_KEY_SECRET:?set ENRICHMENT_KEY_SECRET in .env, generate with openssl rand -hex 32}"
+      # The app and worker only ever talk to each other over the compose
+      # network, never directly from a browser, so this is the app's
+      # internal service name, not its public URL.
+      FRONTEND_ORIGIN: "${FRONTEND_ORIGIN:-http://app:3000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  pgdata:

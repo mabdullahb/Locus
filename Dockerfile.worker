@@ -1,0 +1,40 @@
+# The background worker: the Express + WebSocket server that actually runs
+# searches and AI enrichment (server/index.ts). Separate from the Next.js
+# app image so the two can be scaled, restarted, and deployed independently,
+# matching how docker-compose.yml runs them as two services.
+
+ARG NODE_VERSION=24.20.0-slim
+
+FROM node:${NODE_VERSION} AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+FROM node:${NODE_VERSION} AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+# node:*-slim doesn't include OpenSSL, which Prisma's engines need to detect
+# the right binary target for. Without it, prisma generate still runs but
+# warns and silently guesses a target.
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# The worker imports the same Prisma client (lib/generated/prisma) as the
+# app, generated fresh here rather than copied from a separate build stage,
+# since this image has its own full source checkout already.
+RUN npx prisma generate
+
+RUN groupadd --system --gid 1001 nodejs && useradd --system --uid 1001 --gid nodejs worker
+USER worker
+
+EXPOSE 4000
+
+# Compose only gates worker startup on postgres/redis being healthy, not on
+# the app container's migration finishing, so on a fresh database the worker
+# can otherwise start querying tables that don't exist yet. `migrate deploy`
+# is idempotent (skips already-applied migrations), so running it here too
+# makes worker startup safe regardless of which container wins the race.
+CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx server/index.ts"]
