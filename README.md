@@ -8,7 +8,7 @@
 with AI-verified emails. Free, open-source, bring your own keys, no account
 with us, no fees.**
 
-[![Tests](https://github.com/mabdullahb/Locus/actions/workflows/test.yml/badge.svg)](https://github.com/mabdullahb/Locus/actions/workflows/test.yml) [![License: AGPL-3.0](https://img.shields.io/github/license/mabdullahb/Locus)](LICENSE) [![Docker ready](https://img.shields.io/badge/docker-ready-2496ED)](docker-compose.yml) [![Self-hosted](https://img.shields.io/badge/self--hosted-yes-blue)](#run-it-for-real-with-docker) [![GitHub stars](https://img.shields.io/github/stars/mabdullahb/Locus)](https://github.com/mabdullahb/Locus/stargazers)
+[![Tests](https://github.com/mabdullahb/Locus/actions/workflows/test.yml/badge.svg)](https://github.com/mabdullahb/Locus/actions/workflows/test.yml) [![License: AGPL-3.0](https://img.shields.io/github/license/mabdullahb/Locus)](LICENSE) [![Docker ready](https://img.shields.io/badge/docker-ready-2496ED)](docker-compose.yml) [![Self-hosted](https://img.shields.io/badge/self--hosted-yes-blue)](#run-it-for-real-with-docker) [![GitHub stars](https://img.shields.io/github/stars/mabdullahb/Locus)](https://github.com/mabdullahb/Locus)
 
 [Quickstart](#setup) | [Self-Hosting](#run-it-for-real-with-docker) | [Development](#development) | [Contributing](#contributing)
 
@@ -23,7 +23,7 @@ JSON), or push to a webhook.
 
 ![Locus demo: search, live results, and history](docs/screenshots/demo.gif)
 
-Found this useful? A star helps others find it.
+Found this useful? [A star](https://github.com/mabdullahb/Locus) helps others find it.
 
 Built with Next.js (App Router), Prisma and Postgres, NextAuth, BullMQ and Redis
 for the background worker, and a bring-your-own-key model for the search and AI

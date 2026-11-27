@@ -11,13 +11,17 @@ export interface OpenRouterModelOption {
 // A handful of well-established models across major vendors, used only when
 // OpenRouter's live catalog can't be reached (network issue, OpenRouter down).
 // The "custom model ID" field in Settings covers anything not listed here.
+// Checked against OpenRouter's live catalog on 2026-11-27. Two earlier
+// free entries had been removed from OpenRouter, and the GPT-4o models shut
+// down on 2027-01-14, so this list goes stale and needs the same check.
 const FALLBACK_MODELS: OpenRouterModelOption[] = [
-  { id: "openai/gpt-oss-20b:free", name: "OpenAI: gpt-oss-20b (free)", isFree: true, contextLength: null },
   { id: "google/gemma-4-31b-it:free", name: "Google: Gemma 4 31B (free)", isFree: true, contextLength: null },
-  { id: "nvidia/nemotron-nano-9b-v2:free", name: "NVIDIA: Nemotron Nano 9B V2 (free)", isFree: true, contextLength: null },
-  { id: "openai/gpt-4o-mini", name: "OpenAI: GPT-4o-mini", isFree: false, contextLength: null },
-  { id: "openai/gpt-4o", name: "OpenAI: GPT-4o", isFree: false, contextLength: null },
+  { id: "google/gemma-4-26b-a4b-it:free", name: "Google: Gemma 4 26B A4B (free)", isFree: true, contextLength: null },
+  { id: "nvidia/nemotron-3.5-lightning:free", name: "NVIDIA: Nemotron 3.5 Lightning (free)", isFree: true, contextLength: null },
+  { id: "openai/gpt-6-luna", name: "OpenAI: GPT-6 Luna", isFree: false, contextLength: null },
+  { id: "anthropic/claude-haiku-5.5", name: "Anthropic: Claude Haiku 5.5", isFree: false, contextLength: null },
   { id: "anthropic/claude-opus-4.8", name: "Anthropic: Claude Opus 4.8", isFree: false, contextLength: null },
+  { id: "google/gemini-3.6-flash", name: "Google: Gemini 3.6 Flash", isFree: false, contextLength: null },
   { id: "google/gemini-3.5-flash", name: "Google: Gemini 3.5 Flash", isFree: false, contextLength: null },
   { id: "meta-llama/llama-3.1-8b-instruct", name: "Meta: Llama 3.1 8B Instruct", isFree: false, contextLength: null },
   { id: "mistralai/mistral-small-3.1-24b-instruct", name: "Mistral: Small 3.1 24B Instruct", isFree: false, contextLength: null },

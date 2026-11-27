@@ -50,8 +50,13 @@ export const openaiProvider: EnrichmentProvider = {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: ctx.model || "gpt-4o-mini",
-        max_tokens: 1024,
+        // gpt-4o-mini shuts down on 2027-01-14. gpt-6-luna is the
+        // replacement OpenAI lists on its deprecations page.
+        model: ctx.model || "gpt-6-luna",
+        // Newer OpenAI models reject max_tokens and count reasoning tokens
+        // toward this limit, so leave room beyond the short JSON answer.
+        // Older chat models accept max_completion_tokens too.
+        max_completion_tokens: 4096,
         messages: [
           {
             role: "user",
