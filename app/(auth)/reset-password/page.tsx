@@ -89,7 +89,7 @@ function ResetPasswordForm() {
           placeholder="At least 8 characters"
           required
           minLength={8}
-          className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
         />
       </div>
 
@@ -104,7 +104,7 @@ function ResetPasswordForm() {
           placeholder="Re-enter the password"
           required
           minLength={8}
-          className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+          className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
         />
       </div>
 
@@ -125,7 +125,7 @@ export default function ResetPasswordPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <Link href="/" className="mx-auto mb-7 block w-60 outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link href="/" className="mx-auto mb-7 block w-60 outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
             <LocusLogo className="w-full text-foreground-strong" />
           </Link>
           <h1 className="font-display text-2xl font-semibold text-foreground">

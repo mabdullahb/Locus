@@ -50,7 +50,7 @@ export function DangerZoneTab({ email }: { email: string }) {
         // background, needs the bracket form since plain /3 isn't in
         // Tailwind's default opacity scale and silently generates no rule
         // at all (confirmed live: renders fully transparent, not a 3% tint).
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/[3%] px-4 py-3 text-sm text-destructive">
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/3 px-4 py-3 text-sm text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {error}
         </div>
@@ -82,13 +82,13 @@ export function DangerZoneTab({ email }: { email: string }) {
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder={email}
-              className="h-9 w-full rounded-lg border border-destructive/40 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-destructive focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-destructive/40 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-destructive focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
             <PasswordInput
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Current password"
-              className="h-9 w-full rounded-lg border border-destructive/40 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-destructive focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-destructive/40 bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-destructive focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
             <div className="flex items-center gap-2">
               <button

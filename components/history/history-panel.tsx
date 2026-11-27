@@ -138,7 +138,7 @@ export function HistoryPanel() {
     <>
       {isPanelOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm"
+          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-xs"
           onClick={closePanel}
         />
       )}

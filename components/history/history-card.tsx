@@ -104,7 +104,7 @@ export function HistoryCard({ session, onReRun, onViewDetails }: HistoryCardProp
   };
 
   return (
-    <div className="group rounded-lg border border-border bg-card p-3 transition-all hover:border-accent/30 hover:shadow-sm">
+    <div className="group rounded-lg border border-border bg-card p-3 transition-all hover:border-accent/30 hover:shadow-xs">
       <div className="mb-2 flex items-start justify-between">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">

@@ -7,6 +7,16 @@ vi.mock("@/lib/enrichment/service", () => ({
   enrichLead: vi.fn().mockResolvedValue({ email: null, phone: null, confidence: null, source: "none" }),
 }));
 
+// The SSRF guard resolves the lead's website host before fetching it. Left
+// unmocked, that was a real DNS lookup of acme.com: the test needed
+// internet access, and under the full suite's parallel load it sometimes
+// took over 5s and timed out. A fixed public address keeps the guard in the
+// path without touching the network.
+vi.mock("dns", () => {
+  const lookup = vi.fn().mockResolvedValue([{ address: "93.184.215.14", family: 4 }]);
+  return { default: { promises: { lookup } }, promises: { lookup } };
+});
+
 import { hybridEnrichLead } from "@/lib/enrichment/strategies";
 import { enrichLead } from "@/lib/enrichment/service";
 

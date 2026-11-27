@@ -127,7 +127,7 @@ export default function AdminPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by email or name"
                 aria-label="Search users"
-                className="h-9 w-64 rounded-lg border border-input bg-background pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-9 w-64 rounded-lg border border-input bg-background pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
               />
             </div>
           </div>

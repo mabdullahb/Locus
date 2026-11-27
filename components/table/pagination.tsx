@@ -45,7 +45,7 @@ export function Pagination({
           <select
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-2 py-0.5 text-xs text-foreground focus:border-ring focus:outline-none"
+            className="rounded-md border border-input bg-background px-2 py-0.5 text-xs text-foreground focus:border-ring focus:outline-hidden"
           >
             <option value={25}>25</option>
             <option value={50}>50</option>

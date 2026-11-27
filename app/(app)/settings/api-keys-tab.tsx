@@ -338,7 +338,7 @@ export function ApiKeysTab() {
                   id="provider-select"
                   value={provider}
                   onChange={(e) => setProvider(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
                 >
                   <optgroup label="Business Search">
                     <option value="serpapi">SerpApi</option>
@@ -364,7 +364,7 @@ export function ApiKeysTab() {
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="Enter your API key"
-                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
                 />
               </div>
               <button
@@ -393,7 +393,7 @@ export function ApiKeysTab() {
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
                     disabled={orModelsLoading}
-                    className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+                    className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring disabled:opacity-50"
                   >
                     <option value="">Use default (OpenRouter auto-router, free)</option>
                     {orModels.some((m) => m.isFree) && (
@@ -434,7 +434,7 @@ export function ApiKeysTab() {
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value)}
                     placeholder="e.g. locus"
-                    className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-mono text-foreground placeholder:font-sans placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm font-mono text-foreground placeholder:font-sans placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
                   />
                 </div>
                 {modelMissing && apiKey.trim() && (

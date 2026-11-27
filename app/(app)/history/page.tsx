@@ -331,7 +331,7 @@ export default function HistoryPage() {
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             placeholder="Search sessions..."
-            className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -460,15 +460,15 @@ export default function HistoryPage() {
                   <ColumnResizeHandle onMouseDown={startResize("leads")} />
                 </th>
                 <th className="relative hidden overflow-hidden px-4 py-3 text-center lg:table-cell">
-                  <span data-testid="sort-label" className="truncate">Emails</span>
+                  <span data-testid="sort-label" className="block truncate text-xs font-medium text-muted-foreground">Emails</span>
                   <ColumnResizeHandle onMouseDown={startResize("emails")} />
                 </th>
                 <th className="relative hidden overflow-hidden px-4 py-3 text-center lg:table-cell">
-                  <span data-testid="sort-label" className="truncate">Enriched</span>
+                  <span data-testid="sort-label" className="block truncate text-xs font-medium text-muted-foreground">Enriched</span>
                   <ColumnResizeHandle onMouseDown={startResize("enriched")} />
                 </th>
                 <th className="relative hidden overflow-hidden px-4 py-3 text-center sm:table-cell">
-                  <span data-testid="sort-label" className="truncate">Duration</span>
+                  <span data-testid="sort-label" className="block truncate text-xs font-medium text-muted-foreground">Duration</span>
                   <ColumnResizeHandle onMouseDown={startResize("duration")} />
                 </th>
                 <th className="px-4 py-3">
@@ -498,7 +498,7 @@ export default function HistoryPage() {
                       onClick={() => handleViewSession(session.id)}
                       title="View results from this search"
                       className={`group cursor-pointer border-b border-border last:border-0 hover:bg-muted/30 ${
-                        selectedIds.has(session.id) ? "bg-primary/[0.06]" : ""
+                        selectedIds.has(session.id) ? "bg-primary/6" : ""
                       }`}
                     >
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -620,7 +620,7 @@ export default function HistoryPage() {
                       )}
                     </button>
                     {isErrorExpanded && (
-                      <div className="space-y-3 border-t border-border bg-destructive/[0.03] px-4 py-3">
+                      <div className="space-y-3 border-t border-border bg-destructive/3 px-4 py-3">
                         <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
                           <p className="text-xs font-medium text-destructive">Error Log</p>
                           <p className="mt-1 text-xs text-muted-foreground">

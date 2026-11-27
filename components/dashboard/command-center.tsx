@@ -164,7 +164,7 @@ export function CommandCenter() {
               value={form.keyword}
               onChange={(e) => updateForm("keyword", e.target.value)}
               placeholder="software agencies"
-              className="w-full border-b border-dotted border-muted-foreground/50 bg-transparent px-1 pb-1 pl-6 font-mono text-[14px] text-foreground-strong placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+              className="w-full border-b border-dotted border-muted-foreground/50 bg-transparent px-1 pb-1 pl-6 font-mono text-[14px] text-foreground-strong placeholder:text-muted-foreground/60 focus:border-primary focus:outline-hidden"
             />
           </span>
           <span>in</span>
@@ -176,7 +176,7 @@ export function CommandCenter() {
               value={form.location}
               onChange={(e) => updateForm("location", e.target.value)}
               placeholder="Hyderabad"
-              className="w-full border-b border-dotted border-muted-foreground/50 bg-transparent px-1 pb-1 pl-6 font-mono text-[14px] text-foreground-strong placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+              className="w-full border-b border-dotted border-muted-foreground/50 bg-transparent px-1 pb-1 pl-6 font-mono text-[14px] text-foreground-strong placeholder:text-muted-foreground/60 focus:border-primary focus:outline-hidden"
             />
           </span>
           <span>within</span>
@@ -184,7 +184,7 @@ export function CommandCenter() {
             value={form.radius}
             onChange={(e) => updateForm("radius", e.target.value)}
             aria-label="Search radius"
-            className="border-b border-dotted border-muted-foreground/50 bg-transparent px-1 pb-1 font-mono text-[14px] text-foreground-strong focus:border-primary focus:outline-none [&>option]:bg-popover [&>option]:text-popover-foreground"
+            className="border-b border-dotted border-muted-foreground/50 bg-transparent px-1 pb-1 font-mono text-[14px] text-foreground-strong focus:border-primary focus:outline-hidden [&>option]:bg-popover [&>option]:text-popover-foreground"
           >
             <option value="1">1 km</option>
             <option value="5">5 km</option>

@@ -135,7 +135,7 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
           </div>
           <div>
@@ -145,7 +145,7 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
           </div>
           {emailChanged && (
@@ -156,7 +156,7 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
                 value={detailsPassword}
                 onChange={(e) => setDetailsPassword(e.target.value)}
                 placeholder="Required to change your email"
-                className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
               />
             </div>
           )}
@@ -200,7 +200,7 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
               id="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
           </div>
           <div>
@@ -210,7 +210,7 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="At least 8 characters"
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
           </div>
           <div>
@@ -219,7 +219,7 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
               id="confirm-new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
           </div>
           <button

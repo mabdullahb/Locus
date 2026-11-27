@@ -84,7 +84,7 @@ export function Sidebar() {
       <div className="flex h-14 items-center border-b border-sidebar-border px-5">
         <Link
           href="/dashboard"
-          className="flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex items-center rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
         >
           {collapsed ? (
             <LocusMark className="h-7 w-7 text-primary" />
@@ -167,7 +167,7 @@ export function Sidebar() {
       {/* Mobile overlay */}
       {mobileSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs lg:hidden"
           onClick={() => setMobileSidebarOpen(false)}
         >
           <div
@@ -178,7 +178,7 @@ export function Sidebar() {
               <Link
                 href="/dashboard"
                 onClick={() => setMobileSidebarOpen(false)}
-                className="flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex items-center rounded-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <LocusWordmark className="h-[26px] w-auto text-sidebar-foreground" />
               </Link>

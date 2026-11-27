@@ -45,7 +45,11 @@ function requireInternalSecret(req: Request, res: Response, next: NextFunction) 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: "/ws" });
 
-const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
+// protocol: 2 keeps the RESP2 wire protocol. ioredis 6 defaults to RESP3,
+// which changes some reply shapes, and BullMQ's docs don't say its Lua
+// scripts are verified under RESP3. maxRetriesPerRequest: null is required
+// for BullMQ workers.
+const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null, protocol: 2 });
 
 const scrapeQueue = new Queue("scrape-jobs", { connection });
 

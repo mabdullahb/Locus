@@ -224,7 +224,7 @@ export function IntegrationsTab() {
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}
               placeholder="https://hooks.example.com/endpoint"
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
             <p className="mt-1 text-xs text-muted-foreground">
               Compatible with n8n, Zapier, Make, and any HTTP endpoint. Data is sent
@@ -241,7 +241,7 @@ export function IntegrationsTab() {
               value={webhookSecret}
               onChange={(e) => setWebhookSecret(e.target.value)}
               placeholder="Shared secret for HMAC signing"
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
             />
             <p className="mt-1 text-xs text-muted-foreground">
               If set, sent as <code className="rounded bg-muted px-1">X-Webhook-Secret</code> header.

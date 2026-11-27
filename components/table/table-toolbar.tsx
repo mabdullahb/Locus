@@ -170,7 +170,7 @@ export function TableToolbar({ totalCount }: { totalCount: number }) {
             value={searchQuery}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, location, phone, or email..."
-            className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-9 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-hidden focus:ring-1 focus:ring-ring"
           />
         </div>
 
