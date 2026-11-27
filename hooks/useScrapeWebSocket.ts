@@ -163,8 +163,10 @@ export function useScrapeWebSocket(sessionId: string | null) {
           store.setComplete(session.yield.leads, {
             locationsFound: session.yield.leads,
             phonesExtracted: session.yield.phones,
-            emailsVerified: session.yield.emails,
-            fullyEnriched: session.yield.enriched,
+            // Same definitions as the worker's "complete" broadcast:
+            // verified leads, not every email found.
+            emailsVerified: session.yield.verified,
+            fullyEnriched: session.yield.verified,
           });
         } else if (session.status === "failed") {
           store.setError(session.errorLog || "Extraction failed");

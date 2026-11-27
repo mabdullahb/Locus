@@ -144,6 +144,11 @@ export function HistoryPanel() {
       )}
 
       <div
+        // Closed, the panel only slides off-screen (kept mounted for the
+        // transition). inert takes it out of Tab order and the
+        // accessibility tree, otherwise keyboard focus walked into every
+        // invisible Re-run / Download CSV button behind the page.
+        inert={!isPanelOpen}
         className={`fixed right-0 top-0 z-40 flex h-full w-80 flex-col border-l border-border bg-card shadow-xl transition-transform duration-300 ${
           isPanelOpen ? "translate-x-0" : "translate-x-full"
         }`}

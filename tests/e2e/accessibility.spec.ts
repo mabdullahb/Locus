@@ -12,7 +12,37 @@ const pages = [
   { name: "History", path: "/history" },
   { name: "AI Enrichment", path: "/enrichment" },
   { name: "API Keys", path: "/api-keys" },
+  { name: "Settings", path: "/settings" },
+  { name: "Integrations", path: "/integrations" },
+  { name: "Proxy", path: "/proxy" },
 ];
+
+// Signed-out pages. These were never scanned, so a label/visible-text
+// mismatch on their logo link (aria-label "Locus home" vs the wordmark's
+// drawn glyphs) went unnoticed here while the same bug in the sidebar was
+// caught once axe-core started checking label-content-name-mismatch.
+const publicPages = [
+  { name: "Login", path: "/login" },
+  { name: "Register", path: "/register" },
+  { name: "Forgot password", path: "/forgot-password" },
+  { name: "Reset password", path: "/reset-password?token=e2e-placeholder" },
+];
+
+test.describe("signed out", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+  for (const { name, path } of publicPages) {
+    test(`${name} has no critical/serious accessibility violations`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      const results = await new AxeBuilder({ page }).analyze();
+      const failing = results.violations.filter((v) => FAILING_IMPACTS.includes(v.impact ?? ""));
+      const summary = failing
+        .map((v) => `${v.impact}: ${v.id} — ${v.help} (${v.nodes.length} element(s))`)
+        .join("\n");
+      expect(failing, `Accessibility violations on ${name}:\n${summary}`).toEqual([]);
+    });
+  }
+});
 
 for (const { name, path } of pages) {
   test(`${name} has no critical/serious accessibility violations`, async ({ page }) => {

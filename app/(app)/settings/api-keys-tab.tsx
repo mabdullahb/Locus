@@ -358,8 +358,9 @@ export function ApiKeysTab() {
                 </select>
               </div>
               <div className="min-w-[240px] flex-1">
-                <label className="mb-1 block text-xs text-muted-foreground">API Key</label>
+                <label htmlFor="api-key-input" className="mb-1 block text-xs text-muted-foreground">API Key</label>
                 <PasswordInput
+              id="api-key-input"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   placeholder="Enter your API key"

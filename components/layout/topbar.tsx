@@ -50,9 +50,15 @@ export function Topbar() {
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
+            // Screen readers announced only the initials ("QD"), with no
+            // hint that this opens the account menu or whether it's open.
+            aria-expanded={showUserMenu}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground hover:bg-muted/80"
           >
-            {session?.user ? getInitials(session.user.name || session.user.email) : "U"}
+            <span aria-hidden="true">
+              {session?.user ? getInitials(session.user.name || session.user.email) : "U"}
+            </span>
+            <span className="sr-only">Account menu</span>
           </button>
 
           {showUserMenu && (

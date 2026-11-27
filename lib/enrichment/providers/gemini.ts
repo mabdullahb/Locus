@@ -46,7 +46,9 @@ export const geminiProvider: EnrichmentProvider = {
   ): Promise<EnrichmentResult> {
     const genAI = new GoogleGenerativeAI(ctx.apiKey);
     const model = genAI.getGenerativeModel({
-      model: ctx.model || "gemini-2.0-flash",
+      // gemini-2.0-flash was shut down on 2026-06-01. gemini-3.6-flash is
+      // Google's listed replacement (ai.google.dev deprecations page).
+      model: ctx.model || "gemini-3.6-flash",
     });
 
     const prompt = `${EXTRACTION_PROMPT}Business: ${businessName}\n\n${contextText.slice(0, 8000)}`;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { MapPin, Phone, ShieldCheck, Sparkles } from "lucide-react";
+import { AnimatedCount } from "@/components/ui/animated-count";
 import { cn } from "@/lib/utils";
 import { useExtractionStore } from "@/stores/extraction-store";
 
@@ -11,30 +11,6 @@ const metrics = [
   { label: "Emails Verified", key: "emailsVerified" as const, icon: ShieldCheck },
   { label: "Fully Enriched", key: "fullyEnriched" as const, icon: Sparkles },
 ];
-
-function AnimatedLiveCount({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (target === 0) return;
-    const duration = 400;
-    const steps = 10;
-    const increment = target / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [target]);
-
-  return <span>{count.toLocaleString()}</span>;
-}
 
 export function LiveMetricsRow() {
   const status = useExtractionStore((s) => s.status);
@@ -66,7 +42,7 @@ export function LiveMetricsRow() {
                 status === "running" ? "text-muted-foreground" : "text-foreground",
               )}
             >
-              <AnimatedLiveCount target={values[m.key]} />
+              <span><AnimatedCount target={values[m.key]} /></span>
             </span>
           </div>
         );

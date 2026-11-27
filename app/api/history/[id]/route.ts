@@ -20,13 +20,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
   }
 
-  const [grouped, enriched] = await Promise.all([
+  const [grouped, enriched, verified] = await Promise.all([
     prisma.businessLead.groupBy({
       by: ["sessionId"],
       where: { sessionId: session.id },
       _count: { email: true, phone: true },
     }),
     prisma.enrichmentLog.count({ where: { emailFound: true, lead: { sessionId: session.id } } }),
+    prisma.businessLead.count({ where: { sessionId: session.id, emailVerified: true } }),
   ]);
 
   return NextResponse.json({
@@ -39,6 +40,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       emails: grouped[0]?._count?.email ?? 0,
       phones: grouped[0]?._count?.phone ?? 0,
       enriched,
+      // Leads whose email passed verification. "emails" above counts any
+      // email found, which is what History's "Emails" column shows.
+      verified,
     },
     config: {
       keyword: session.query,

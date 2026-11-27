@@ -13,6 +13,7 @@ import { hybridEnrichLead, decryptApiKey, sanitizeLog, describeEnrichmentError }
 import { verifySmtp } from "@/lib/enrichment/smtp-verifier";
 import { parseLocale, filterByRadius, computeDedupeKey, type SearchResultItem } from "@/lib/search-utils";
 import { verifyInternalSecret } from "@/lib/internal-auth";
+import { fetchSerperResults } from "@/lib/search/serper";
 
 const EMAIL_REGEXP = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -67,6 +68,8 @@ interface ScrapeJobData {
 interface Continuation {
   serpNextStart?: number;
   serperNextPage?: number;
+  // Serper /maps needs the page-1 "ll" (GPS location) on every later page.
+  serperLl?: string | null;
   googleNextPageToken?: string | null;
   [key: string]: unknown;
 }
@@ -261,79 +264,6 @@ async function fetchSerpApiResults(
   return { results, nextOffset: start, hasMore };
 }
 
-async function fetchSerperResults(
-  serperKey: string, query: string, location: string, targetCount: number, startPage: number,
-  locale?: string,
-): Promise<{ results: SearchResultItem[]; nextPage: number; hasMore: boolean }> {
-  if (!serperKey) throw new Error("Serper.dev key is empty");
-
-  const { hl, gl } = parseLocale(locale);
-  const results: SearchResultItem[] = [];
-  const FETCH_TIMEOUT = 30000;
-  let page = startPage;
-  let hasMore = false;
-
-  while (results.length < targetCount) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-
-    // cid ("customer id", Google's own numeric place identifier) is read
-    // defensively here, unconfirmed against a live Serper.dev key whether
-    // their /places response actually includes it, same caveat as
-    // SearchResultItem.placeId documents. Falls back to name+location
-    // matching either way if it's absent.
-    let data: { places?: Array<{ title?: string; address?: string; phoneNumber?: string; website?: string; rating?: number; ratingCount?: number; latitude?: number; longitude?: number; cid?: string }> };
-    try {
-      const res = await fetch("https://google.serper.dev/places", {
-        method: "POST",
-        signal: controller.signal,
-        headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ q: `${query} ${location}`, page, gl, hl }),
-      });
-      clearTimeout(timeoutId);
-
-      if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        throw new Error(`Serper.dev HTTP ${res.status}: ${body.slice(0, 500)}`);
-      }
-      data = await res.json();
-    } catch (e) {
-      if ((e as Error).name === "AbortError") throw new Error("Serper.dev request timed out");
-      throw e;
-    }
-
-    const items = data.places || [];
-    page += 1;
-    if (items.length === 0) {
-      hasMore = false;
-      break;
-    }
-
-    for (const item of items) {
-      results.push({
-        title: item.title || "",
-        address: item.address || "",
-        phone: item.phoneNumber || null,
-        placeId: item.cid || null,
-        website: item.website || null,
-        rating: item.rating || null,
-        reviews: item.ratingCount || null,
-        lat: typeof item.latitude === "number" ? item.latitude : null,
-        lng: typeof item.longitude === "number" ? item.longitude : null,
-      });
-      if (results.length >= targetCount) break;
-    }
-
-    // Serper doesn't return an explicit "more pages" flag — a full page
-    // (typically 10 results) suggests there may be another; a short page
-    // means we've hit the end of what the provider has for this query.
-    hasMore = items.length >= 10;
-    if (!hasMore || results.length >= targetCount) break;
-  }
-
-  return { results, nextPage: page, hasMore };
-}
-
 async function fetchGooglePlacesResults(
   apiKey: string, query: string, location: string, targetCount: number, startPageToken: string | null,
   locale?: string,
@@ -446,10 +376,10 @@ async function runSearchBatch(
     return { results, continuation: { googleNextPageToken: nextPageToken }, hasMore };
   }
   if (provider === "serper") {
-    const { results, nextPage, hasMore } = await fetchSerperResults(
-      key, query, location, BATCH_SIZE, continuation.serperNextPage ?? 1, locale,
+    const { results, nextPage, hasMore, ll } = await fetchSerperResults(
+      key, query, location, BATCH_SIZE, continuation.serperNextPage ?? 1, locale, continuation.serperLl ?? null,
     );
-    return { results, continuation: { serperNextPage: nextPage }, hasMore };
+    return { results, continuation: { serperNextPage: nextPage, serperLl: ll }, hasMore };
   }
   const { results, nextOffset, hasMore } = await fetchSerpApiResults(
     key, query, location, BATCH_SIZE, continuation.serpNextStart ?? 0, locale,
@@ -742,7 +672,6 @@ new Worker<ScrapeJobData>(
               });
 
               if (validEmail) {
-                enrichedInBatch++;
                 // Enrichment can discover a phone number the initial search
                 // results didn't have (result.phone), same source as the
                 // email. The live "Phones Extracted" counter below was
@@ -794,6 +723,10 @@ new Worker<ScrapeJobData>(
                 } else {
                   outcomeStatus = "verified";
                   outcomeEmail = validEmail;
+                  // Counted here, not when the AI first returns an email:
+                  // an SMTP-rejected address stays needs_enrich and must
+                  // not show up in the live "Emails Verified" count.
+                  enrichedInBatch++;
                   await prisma.businessLead.update({
                     where: { id: lead.id },
                     data: {
@@ -904,7 +837,9 @@ new Worker<ScrapeJobData>(
         select: { id: true, phone: true, email: true, status: true, businessName: true, location: true, website: true },
       });
       const phonesInDb = finalLeads.filter((l) => l.phone).length;
-      const emailsInDb = finalLeads.filter((l) => l.email).length;
+      // "Emails Verified" means verified (same as the dashboard's monthly
+      // stat), not "has an email". Counting every email made the live card
+      // show 9 while This month showed 8 for the same run.
       const verifiedInDb = finalLeads.filter((l) => l.status === "verified").length;
 
       await new Promise((r) => setTimeout(r, 300));
@@ -912,7 +847,7 @@ new Worker<ScrapeJobData>(
         sessionId,
         totalYield: finalLeads.length,
         phonesExtracted: phonesInDb,
-        emailsVerified: emailsInDb,
+        emailsVerified: verifiedInDb,
         fullyEnriched: verifiedInDb,
         hasMore: batch.hasMore,
         leads: finalLeads,

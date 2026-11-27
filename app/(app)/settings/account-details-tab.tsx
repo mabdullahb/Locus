@@ -129,8 +129,9 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Name</label>
+            <label htmlFor="account-name" className="mb-1.5 block text-sm font-medium text-foreground">Name</label>
             <input
+              id="account-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -138,8 +139,9 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
+            <label htmlFor="account-email" className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
             <input
+              id="account-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -148,8 +150,9 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
           </div>
           {emailChanged && (
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">Current Password</label>
+              <label htmlFor="account-email-confirm-password" className="mb-1.5 block text-sm font-medium text-foreground">Current Password</label>
               <PasswordInput
+              id="account-email-confirm-password"
                 value={detailsPassword}
                 onChange={(e) => setDetailsPassword(e.target.value)}
                 placeholder="Required to change your email"
@@ -192,16 +195,18 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Current Password</label>
+            <label htmlFor="current-password" className="mb-1.5 block text-sm font-medium text-foreground">Current Password</label>
             <PasswordInput
+              id="current-password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">New Password</label>
+            <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-foreground">New Password</label>
             <PasswordInput
+              id="new-password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="At least 8 characters"
@@ -209,8 +214,9 @@ export function AccountDetailsTab({ account, loading, onAccountUpdate }: Account
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Confirm New Password</label>
+            <label htmlFor="confirm-new-password" className="mb-1.5 block text-sm font-medium text-foreground">Confirm New Password</label>
             <PasswordInput
+              id="confirm-new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"

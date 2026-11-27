@@ -31,7 +31,9 @@ export function StatusBadge({
       className={cn(
         "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 font-mono text-[10.5px] tracking-wide uppercase",
         badgeStyles[status],
-        enriching && "pointer-events-none opacity-70",
+        // The pulsing dot and "Enriching" label mark this state. No opacity,
+        // which would pull the muted text below WCAG AA contrast.
+        enriching && "pointer-events-none",
       )}
     >
       {enriching && (

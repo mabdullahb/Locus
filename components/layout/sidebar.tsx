@@ -84,7 +84,6 @@ export function Sidebar() {
       <div className="flex h-14 items-center border-b border-sidebar-border px-5">
         <Link
           href="/dashboard"
-          aria-label="Locus home"
           className="flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {collapsed ? (
@@ -178,7 +177,6 @@ export function Sidebar() {
             <div className="flex h-14 items-center justify-between border-b border-sidebar-border px-4">
               <Link
                 href="/dashboard"
-                aria-label="Locus home"
                 onClick={() => setMobileSidebarOpen(false)}
                 className="flex items-center rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >

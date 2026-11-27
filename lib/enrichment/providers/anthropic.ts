@@ -51,8 +51,14 @@ export const anthropicProvider: EnrichmentProvider = {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: ctx.model || "claude-3-haiku-20240307",
-        max_tokens: 1024,
+        // claude-3-haiku-20240307 was retired on 2026-04-20, after which
+        // every request failed. Claude Haiku 5.5 is the current small model.
+        model: ctx.model || "claude-haiku-5-5",
+        // Haiku 5.5 thinks by default and thinking tokens count toward
+        // max_tokens, so leave room beyond the short JSON answer. Low effort
+        // is plenty for pulling an email and phone out of page text.
+        max_tokens: 4096,
+        output_config: { effort: "low" },
         messages: [
           {
             role: "user",
@@ -72,7 +78,16 @@ export const anthropicProvider: EnrichmentProvider = {
     if (!response.ok) {
       throw new Error(body?.error?.message || `Anthropic request failed with status ${response.status}`);
     }
-    const text = body.content?.[0]?.text || "";
+    // A declined request still returns HTTP 200. Without this it would
+    // read as a clean "no email found".
+    if (body.stop_reason === "refusal") {
+      throw new Error("Claude declined this request (refusal)");
+    }
+    // Current models return thinking blocks before the answer, so
+    // content[0] is no longer the text. Reading it gave an empty string,
+    // which parsed as "no email found" for every lead.
+    const textBlock = (body.content ?? []).find((b: { type?: string }) => b.type === "text") as { text?: string } | undefined;
+    const text = textBlock?.text || "";
 
     const parsed = parseJsonResponse(text);
 

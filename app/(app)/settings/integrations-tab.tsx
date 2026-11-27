@@ -215,10 +215,11 @@ export function IntegrationsTab() {
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">
+            <label htmlFor="webhook-url" className="mb-1.5 block text-sm font-medium text-foreground">
               Endpoint URL
             </label>
             <input
+              id="webhook-url"
               type="url"
               value={webhookUrl}
               onChange={(e) => setWebhookUrl(e.target.value)}
@@ -232,10 +233,11 @@ export function IntegrationsTab() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">
+            <label htmlFor="webhook-secret" className="mb-1.5 block text-sm font-medium text-foreground">
               Secret <span className="text-xs text-muted-foreground">(optional)</span>
             </label>
             <PasswordInput
+              id="webhook-secret"
               value={webhookSecret}
               onChange={(e) => setWebhookSecret(e.target.value)}
               placeholder="Shared secret for HMAC signing"
@@ -336,7 +338,10 @@ export function IntegrationsTab() {
                     "flex items-center justify-between rounded-lg border p-4",
                     saved?.isActive
                       ? "border-positive/40 bg-positive/10"
-                      : "border-border bg-background opacity-60",
+                      : // Dashed border plus the "Coming soon" badge mark it as
+                        // unavailable. Not opacity, which dropped the muted text
+                        // below WCAG AA contrast (3.03:1).
+                        "border-dashed border-border bg-background",
                   )}
                 >
                   <div className="flex items-center gap-3">

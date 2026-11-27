@@ -4,6 +4,7 @@ const { instances, FakeSocket } = vi.hoisted(() => {
   // require, not import, since this whole block runs inside vi.hoisted
   // (before ES module imports are set up) so the module system's own
   // static imports aren't available here yet.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- see above
   const { EventEmitter } = require("node:events");
   const instances: InstanceType<typeof FakeSocketClass>[] = [];
   class FakeSocketClass extends EventEmitter {

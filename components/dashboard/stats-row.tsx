@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useExtractionStore } from "@/stores/extraction-store";
+import { AnimatedCount } from "@/components/ui/animated-count";
 
 const STAT_CONFIG = [
   { label: "Leads scraped", key: "monthlyLeadsFound" as const, note: (v: Record<string, number>) => `${v.monthlyExtractions ?? 0} extractions` },
@@ -9,26 +10,6 @@ const STAT_CONFIG = [
   { label: "Phone numbers", key: "monthlyPhoneCount" as const, note: (v: Record<string, number>) => (v.monthlyLeadsFound ? `${Math.round(((v.monthlyPhoneCount ?? 0) / v.monthlyLeadsFound) * 100)}% of leads` : "") },
   { label: "Enrichment runs", key: "monthlyEnrichmentRuns" as const, note: () => "this month" },
 ];
-
-function AnimatedCount({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (target === 0) {
-      queueMicrotask(() => setCount(0));
-      return;
-    }
-    const steps = 22;
-    const inc = target / steps;
-    let cur = 0;
-    const t = setInterval(() => {
-      cur += inc;
-      if (cur >= target) { setCount(target); clearInterval(t); }
-      else setCount(Math.floor(cur));
-    }, 700 / steps);
-    return () => clearInterval(t);
-  }, [target]);
-  return <>{count.toLocaleString()}</>;
-}
 
 export function StatsRow() {
   const [values, setValues] = useState<Record<string, number>>({});
@@ -73,7 +54,7 @@ export function StatsRow() {
           >
             <p className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-muted-foreground">{item.label}</p>
             <p className="mt-2.5 font-mono text-[28px] font-medium leading-none tracking-[-0.01em] tabular-nums text-foreground-strong">
-              <AnimatedCount target={values[item.key] ?? 0} />
+              <AnimatedCount target={values[item.key] ?? 0} durationMs={700} steps={22} />
             </p>
             <p className="mt-2 font-mono text-[10.5px] tracking-wide text-muted-foreground/90">
               {item.note(values)}

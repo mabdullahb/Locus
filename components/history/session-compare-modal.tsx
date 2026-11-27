@@ -28,7 +28,7 @@ function Delta({ a, b }: { a: number; b: number }) {
 
 const METRIC_ROWS: Array<{ label: string; get: (s: CompareSession) => number }> = [
   { label: "Total leads", get: (s) => s.yield.leads },
-  { label: "Verified emails", get: (s) => s.yield.emails },
+  { label: "Emails found", get: (s) => s.yield.emails },
   { label: "Phone numbers", get: (s) => s.yield.phones },
   { label: "Enrichment attempts", get: (s) => s.yield.enriched },
 ];
@@ -41,17 +41,24 @@ const STATUS_ROWS: Array<{ label: string; key: keyof CompareSession["statusBreak
 ];
 
 export function SessionCompareModal({ ids, onClose }: { ids: [string, string]; onClose: () => void }) {
-  const [sessions, setSessions] = useState<CompareSession[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  // The result is stored with the key it was fetched for, so "loading" is
+  // derived (result belongs to a different id pair) instead of being reset
+  // with a synchronous setState inside the effect.
+  const key = ids.join(",");
+  const [result, setResult] = useState<{
+    key: string;
+    sessions: CompareSession[] | null;
+    error: string | null;
+  } | null>(null);
+  const loading = result?.key !== key;
+  const sessions = loading ? null : result.sessions;
+  const error = loading ? null : result.error;
 
   useEscapeToClose(onClose);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
-    fetch(`/api/history/compare?ids=${encodeURIComponent(ids.join(","))}`)
+    fetch(`/api/history/compare?ids=${encodeURIComponent(key)}`)
       .then(async (res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -62,19 +69,17 @@ export function SessionCompareModal({ ids, onClose }: { ids: [string, string]; o
           // guard against that assumption drifting silently by re-sorting
           // to match ids[] explicitly rather than trusting response order.
           const byId = new Map(data.sessions.map((s: CompareSession) => [s.id, s]));
-          setSessions(ids.map((id) => byId.get(id)).filter(Boolean) as CompareSession[]);
+          const ordered = key.split(",").map((id) => byId.get(id)).filter(Boolean) as CompareSession[];
+          setResult({ key, sessions: ordered, error: null });
         }
       })
       .catch(() => {
-        if (!cancelled) setError("Failed to load comparison");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setResult({ key, sessions: null, error: "Failed to load comparison" });
       });
     return () => {
       cancelled = true;
     };
-  }, [ids]);
+  }, [key]);
 
   return (
     <div

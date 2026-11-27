@@ -31,7 +31,9 @@ export async function GET() {
 
   const [phonesExtracted, emailsVerified, fullyEnriched] = await Promise.all([
     prisma.businessLead.count({ where: { sessionId: session.id, phone: { not: null } } }),
-    prisma.businessLead.count({ where: { sessionId: session.id, email: { not: null } } }),
+    // Verified, not "has an email", to match the live card's label and the
+    // dashboard's monthly "Emails verified" stat.
+    prisma.businessLead.count({ where: { sessionId: session.id, emailVerified: true } }),
     prisma.businessLead.count({ where: { sessionId: session.id, status: "verified" } }),
   ]);
 
