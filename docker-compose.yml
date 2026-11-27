@@ -6,8 +6,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-locus}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-locus_dev}
       POSTGRES_DB: ${POSTGRES_DB:-locus}
+    # Bound to 127.0.0.1 so the database is reachable from this machine
+    # (local tools, `npm run dev`) but never from the network. Docker's
+    # published ports bypass host firewalls such as UFW, and the default
+    # password above is public in this repo.
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -19,8 +23,10 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    # Redis has no password, so it must never be reachable from the
+    # network. The app and worker use Docker's internal network.
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

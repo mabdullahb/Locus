@@ -93,7 +93,8 @@ cd Locus
 cp .env.example .env
 # Fill in NEXTAUTH_URL, NEXTAUTH_SECRET, ENRICHMENT_KEY_SECRET, and
 # INTERNAL_API_SECRET in .env before continuing. Docker compose refuses to
-# start without them, on purpose.
+# start without them, on purpose. On a server, also change POSTGRES_PASSWORD
+# (and the password inside DATABASE_URL) from the public default.
 docker compose up --build -d
 ```
 
@@ -103,7 +104,9 @@ Settings. See the comments in `docker-compose.yml` and `.env.example` for
 what `NEXT_PUBLIC_WS_URL` needs to be once this is reachable from outside
 your own machine (it has to be a real address a browser can reach, not a
 Docker-internal one), and put a reverse proxy (nginx, Caddy, Traefik) in
-front for HTTPS rather than exposing the app's port directly.
+front for HTTPS rather than exposing the app's port directly. Postgres and
+Redis are published on `127.0.0.1` only, so they're never reachable from the
+network (Docker's published ports bypass host firewalls like UFW).
 
 ### Run it for development, without Docker
 
